@@ -31,12 +31,10 @@ fn write_and_format<P: AsRef<Path>>(path: &P, contents: &str) -> std::io::Result
 }
 
 pub fn generate_proxy<P: AsRef<Path>>(dll_path: P, tpl_path: P, out_path: P) -> Result<()> {
-    let dll_path = dll_path.as_ref(); // &Path
-    println!(
-        "dll_path {}: exists: {}",
-        dll_path.display(),
-        dll_path.exists()
-    );
+    let dll_path = dll_path.as_ref();
+    let tpl_path = tpl_path.as_ref();
+    let out_path = out_path.as_ref();
+
     let file_map = FileMap::open(&dll_path)?;
     let pe = PeFile::from_bytes(file_map.as_ref())?;
     let pe_exports = pe.exports()?;
@@ -45,8 +43,8 @@ pub fn generate_proxy<P: AsRef<Path>>(dll_path: P, tpl_path: P, out_path: P) -> 
     let mut exports: Vec<Export> = Vec::new();
 
     for result in by.iter_names() {
-        if let (Ok(name), Ok(export)) = result {
-            println!("export {}: {:?}", name, export.symbol().unwrap());
+        if let (Ok(name), Ok(_export)) = result {
+            println!("Found Function: {}", name);
             //TODO: determine if function even has a signature??
             exports.push(Export {
                 name: name.to_string(),
